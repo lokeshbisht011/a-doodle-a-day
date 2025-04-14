@@ -1,4 +1,5 @@
 
+'use client' 
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import DoodleGrid from '@/components/doodle/DoodleGrid';

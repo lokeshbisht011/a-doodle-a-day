@@ -87,7 +87,7 @@ export default function Home() {
   return (
     <Layout user={mockUser}>
       <div className="container py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
           {/* Left sidebar with prompt */}
           <div className="lg:col-span-4 space-y-6">
             <PromptCard prompt={mockPrompt} timeRemaining={timeRemaining} />

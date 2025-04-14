@@ -34,6 +34,9 @@ const DoodleCanvas = ({ onSave, initialImage, userId }) => {
   useEffect(() => {
     if (!canvasElRef.current) return;
 
+    console.log('fabric:', fabric);
+
+
     const canvas = new fabric.Canvas(canvasElRef.current, {
       width: 600,
       height: 600,
