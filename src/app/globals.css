@@ -1,0 +1,105 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 280 20% 98%;
+    --foreground: 282 14% 24%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 282 14% 24%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 282 14% 24%;
+
+    --primary: 265 83% 65%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 284 70% 95%;
+    --secondary-foreground: 265 83% 45%;
+
+    --muted: 284 30% 95%;
+    --muted-foreground: 282 14% 44%;
+
+    --accent: 140 70% 95%;
+    --accent-foreground: 140 70% 35%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 282 14% 91%;
+    --input: 282 14% 91%;
+    --ring: 265 83% 65%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 282 14% 10%;
+    --foreground: 210 40% 98%;
+
+    --card: 282 14% 15%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 282 14% 15%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 265 83% 65%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 284 70% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 284 30% 20%;
+    --muted-foreground: 215 20.2% 75%;
+
+    --accent: 140 70% 20%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 282 14% 30%;
+    --input: 282 14% 30%;
+    --ring: 265 83% 65%;
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.canvas-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
+}
