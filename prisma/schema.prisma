@@ -1,0 +1,211 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  profile       Profile?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Profile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @unique @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  email       String?   @unique
+  name        String?
+  username    String?  @unique
+  avatarConfig Json?
+  bio         String?
+  socialLinks Json?
+
+  doodles     Doodle[]  
+  likes       Like[]
+
+  likesReceivedCount Int @default(0)
+  maxStreakCount    Int @default(0)
+
+  followers   Follow[] @relation("Followers")
+  following   Follow[] @relation("Following")
+
+  streaks     Streak[]
+  badges      BadgeOnProfile[]
+  comments    Comment[]
+
+  doodleCount  Int @default(0)
+  commentCount Int @default(0)
+  currentStreak  Int @default(0)
+  lastActivity DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Doodle {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  json       String
+  imageUrl   String
+  zoomLevel  Float?
+  title      String
+  editable   Boolean  @default(true)
+  likesCount  Int          @default(0) // Added for tracking likes
+
+  profileId  String   @db.ObjectId
+  profile    Profile  @relation(fields: [profileId], references: [id])
+
+  dailyPromptId String?       @db.ObjectId
+  dailyPrompt   DailyPrompt?  @relation(fields: [dailyPromptId], references: [id])
+
+  likes      Like[]
+  comments   Comment[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId String   @db.ObjectId
+  doodleId  String   @db.ObjectId
+
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  doodle    Doodle   @relation(fields: [doodleId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([profileId, doodleId])
+}
+
+model Follow {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  followerId   String   @db.ObjectId
+  followingId  String   @db.ObjectId
+
+  follower     Profile  @relation("Following", fields: [followerId], references: [id])
+  following    Profile  @relation("Followers", fields: [followingId], references: [id])
+
+  createdAt    DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+model DailyPrompt {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  prompt             String
+  promptDescription  String
+  promptDate         DateTime  @unique
+
+  doodles            Doodle[]
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Comment {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  content    String
+
+  profileId  String   @db.ObjectId
+  profile    Profile  @relation(fields: [profileId], references: [id])
+
+  doodleId   String   @db.ObjectId
+  doodle     Doodle   @relation(fields: [doodleId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Streak {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId  String   @db.ObjectId
+  profile    Profile  @relation(fields: [profileId], references: [id])
+
+  startDate  DateTime
+  endDate    DateTime?
+  count      Int      @default(1)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Badge {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  iconUrl     String?
+
+  profiles    BadgeOnProfile[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BadgeOnProfile {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId  String   @db.ObjectId
+  badgeId    String   @db.ObjectId
+
+  profile    Profile  @relation(fields: [profileId], references: [id])
+  badge      Badge    @relation(fields: [badgeId], references: [id])
+
+  awardedAt  DateTime @default(now())
+
+  @@unique([profileId, badgeId])
+}

@@ -1,66 +1,96 @@
+'use client'
 
-'use client' 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Layout from '@/components/layout/Layout';
-import DoodleGrid from '@/components/doodle/DoodleGrid';
+import DoodlesByDateSection from '@/components/doodle/DoodleSection';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { motion } from 'framer-motion';
 
-// Mock user for now
-const mockUser = {
-  id: '1',
-  name: 'Alex Chen',
-  image: 'https://i.pravatar.cc/150?img=1',
+const fetchDoodlesByDate = async (date) => {
+  try {
+    const res = await fetch(`/api/doodles?date=${date}`);
+    if (!res.ok) throw new Error("Failed to fetch doodles");
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
-// Mock data for doodles
-const mockDoodles = Array(12).fill(null).map((_, index) => ({
-  id: `${index + 1}`,
-  prompt: ['Fantasy Creature', 'Underwater City', 'Space Explorer', 'Dream Landscape'][index % 4],
-  imageUrl: `https://via.placeholder.com/400?text=Doodle+${index + 1}`,
-  upvotes: Math.floor(Math.random() * 50),
-  commentCount: Math.floor(Math.random() * 10),
-  createdAt: new Date(Date.now() - (index * 3600000)).toISOString(),
-  user: {
-    id: `${(index % 3) + 1}`,
-    name: ['Alex Chen', 'Jordan Smith', 'Taylor Kim'][(index % 3)],
-    image: `https://i.pravatar.cc/150?img=${(index % 3) + 1}`,
-  },
-}));
+const formatDate = (daysAgo = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().split("T")[0];
+};
 
 const Gallery = () => {
-  const [doodles, setDoodles] = useState(mockDoodles);
+  const { data: session } = useSession();
+  const [doodlesByDate, setDoodlesByDate] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('recent');
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const observerTarget = useRef(null);
+  const daysLoaded = useRef(0);
+
+  const loadMoreDoodles = async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+    const dateToFetch = formatDate(daysLoaded.current);
+    const data = await fetchDoodlesByDate(dateToFetch);
+
+    if (data && data.doodles?.length > 0) {
+      setDoodlesByDate(prev => [...prev, { date: dateToFetch, doodles: data.doodles, prompt: data.prompt }]);
+      daysLoaded.current += 1;
+      setLoading(false);
+    } else {
+      setHasMore(false);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          loadMoreDoodles();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [loading, hasMore]);
+
 
   const handleSearch = (e) => {
     e.preventDefault();
     console.log('Searching for:', searchQuery);
-    // In a real app, this would filter doodles based on the search query
   };
 
   const handleSortChange = (value) => {
     setSortBy(value);
-    
-    let sortedDoodles = [...mockDoodles];
-    
-    if (value === 'popular') {
-      sortedDoodles.sort((a, b) => b.upvotes - a.upvotes);
-    } else if (value === 'recent') {
-      sortedDoodles.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    }
-    
-    setDoodles(sortedDoodles);
+    console.log('Sorting by:', value);
   };
 
   return (
-    <Layout user={mockUser}>
+    <Layout>
       <div className="container py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <h1 className="text-3xl font-bold">Doodle Gallery</h1>
-          
           <div className="flex w-full md:w-auto flex-col sm:flex-row gap-4">
             <form onSubmit={handleSearch} className="relative w-full sm:w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -93,10 +123,25 @@ const Gallery = () => {
           <Button variant="outline" className="rounded-full" size="sm">Dream Landscape</Button>
         </div>
         
-        <DoodleGrid doodles={doodles} />
-        
-        <div className="mt-8 flex justify-center">
-          <Button variant="outline">Load More</Button>
+        <motion.div initial="hidden" animate="visible" className="space-y-8">
+          {doodlesByDate.map((section) => (
+            <DoodlesByDateSection
+              key={section.date}
+              date={section.date}
+              prompt={section.prompt}
+              doodles={section.doodles}
+              currentUserProfile={session?.user || null}
+            />
+          ))}
+        </motion.div>
+
+        <div ref={observerTarget} className="py-8">
+          {loading && (
+            <p className="text-center text-muted-foreground">Loading more doodles...</p>
+          )}
+          {!hasMore && (
+            <p className="text-center text-muted-foreground">You've reached the end of the gallery.</p>
+          )}
         </div>
       </div>
     </Layout>
