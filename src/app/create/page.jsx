@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout/Layout";
 import DoodleCanvas from "@/components/doodle/DoodleCanvas";
@@ -61,7 +61,13 @@ const CreateDoodle = () => {
       try {
         const today = new Date();
         const localDate = today.toISOString().split("T")[0];
-        const res = await fetch(`/api/daily-prompts/today?date=${localDate}`);
+        const res = await fetch(`/api/daily-prompts/today`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ date: localDate }),
+        });
         if (!res.ok) {
           setLoading(false);
           return;
@@ -74,9 +80,9 @@ const CreateDoodle = () => {
         setLoading(false);
       }
     };
+
     fetchPrompt();
   }, []);
-
   useEffect(() => {
     const updateTimer = () => {
       const now = new Date();
@@ -164,7 +170,7 @@ const CreateDoodle = () => {
   const countdownColor = isLastHour ? "text-red-600" : "text-green-600";
 
   return (
-    <Layout user={session?.user ?? null}>
+    <Layout>
       <motion.div
         className="container py-8"
         variants={containerVariants}
@@ -176,6 +182,7 @@ const CreateDoodle = () => {
           <DoodleCanvas
             onSave={handleSaveDoodle}
             userId={session?.user?.id ?? ""}
+            prompt={prompt}
           />
         </motion.div>
 
