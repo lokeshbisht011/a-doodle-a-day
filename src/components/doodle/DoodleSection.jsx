@@ -15,7 +15,7 @@ const sectionVariants = {
   },
 };
 
-const DoodlesByDateSection = ({ date, prompt, doodles, currentUserProfile }) => {
+const DoodlesSection = ({ date, prompt, doodles, currentUserProfile, onDoodleDeleted }) => {
   return (
     <motion.div 
       className="mb-8"
@@ -37,7 +37,7 @@ const DoodlesByDateSection = ({ date, prompt, doodles, currentUserProfile }) => 
             className="flex-shrink-0 w-80"
             variants={sectionVariants}
           >
-            <DoodleCard doodle={doodle} currentUserProfile={currentUserProfile} />
+            <DoodleCard doodle={doodle} currentUserProfile={currentUserProfile} onDoodleDeleted={onDoodleDeleted} />
           </motion.div>
         ))}
       </div>
@@ -45,4 +45,4 @@ const DoodlesByDateSection = ({ date, prompt, doodles, currentUserProfile }) => 
   );
 };
 
-export default DoodlesByDateSection;
+export default DoodlesSection;

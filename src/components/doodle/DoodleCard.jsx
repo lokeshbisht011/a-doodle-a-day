@@ -16,6 +16,7 @@ import BoringAvatar from "boring-avatars";
 import DoodleModal from "./DoodleModal";
 import Image from "next/image";
 import { useToast } from "../ui/use-toast";
+import DeleteDoodleDialog from "./DeleteDoodleDialog";
 
 const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
   const { toast } = useToast();
@@ -23,6 +24,7 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
   const [liked, setLiked] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (currentUserProfile) {
@@ -70,40 +72,8 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
     }
   };
 
-  // 🔹 New handler function to delete the doodle
-  const handleDeleteDoodle = async () => {
-    if (!window.confirm("Are you sure you want to delete this doodle? This cannot be undone.")) {
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/doodle/${doodle.id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        toast({
-          title: "Doodle deleted",
-          description: "The doodle was successfully removed.",
-        });
-        if (onDoodleDeleted) {
-          onDoodleDeleted(doodle.id);
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to delete doodle. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (err) {
-      toast({
-        title: "Network error",
-        description: "Failed to delete doodle.",
-        variant: "destructive",
-      });
-      console.error("Error deleting doodle:", err);
-    }
+  const handleDeleteDoodle = () => {
+    setIsDeleteDialogOpen(true);
   };
 
   return (
@@ -216,6 +186,13 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         currentUserProfile={currentUserProfile}
+      />
+
+      <DeleteDoodleDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        doodleId={doodle.id}
+        onDoodleDeleted={onDoodleDeleted}
       />
     </Card>
   );

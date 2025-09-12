@@ -4,6 +4,9 @@ import prisma from '@/lib/prisma'
 import { authOptions } from '@/lib/authOptions'
 
 export async function PUT(req, { params }) {
+  const { searchParams } = new URL(req.url);
+  const date = searchParams.get("date");
+  
   const session = await getServerSession(authOptions)
 
   if (!session) {
@@ -12,7 +15,7 @@ export async function PUT(req, { params }) {
 
   const { id } = params
   const body = await req.json()
-  const { json, imageUrl, zoomLevel, title } = body
+  const { json, imageUrl, zoomLevel, title, addToTodaysDoodles, editable } = body;
 
   try {
     const profile = await prisma.profile.findUnique({
@@ -32,13 +35,39 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: 'Unauthorized to edit this doodle' }, { status: 403 })
     }
 
+    let dailyPromptId = null;
+
+    if (addToTodaysDoodles) {
+      const clientDate = new Date(date + "T00:00:00");
+      const startOfDay = new Date(clientDate);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(clientDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const prompt = await prisma.dailyPrompt.findFirst({
+        where: {
+          promptDate: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      });
+
+      if (prompt) {
+        dailyPromptId = prompt.id;
+      }
+    }
+
     const updatedDoodle = await prisma.doodle.update({
       where: { id },
       data: {
         json,
         imageUrl,
-        zoomLevel,
         title,
+        zoomLevel,
+        editable,
+        dailyPromptId,
         updatedAt: new Date(),
       },
     })

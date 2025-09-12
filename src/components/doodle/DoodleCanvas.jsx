@@ -6,29 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Paintbrush,
-  Eraser,
-  Square,
-  Circle,
-  Undo,
-  Redo,
-  Download,
-  Trash2,
-  Save,
-  PaintBucket,
-  Search,
-  Plus,
-  Star,
-  Triangle,
-  Shapes,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Download, Loader2, Save, Search } from "lucide-react";
 import Toolbar from "../Toolbar";
 import ColorPicker from "../ColorPicker";
 
@@ -49,11 +27,29 @@ const DoodleCanvas = ({ onSave, doodle, userId, prompt }) => {
   const [addToTodaysDoodles, setAddToTodaysDoodles] = useState(true);
   const [allowEdit, setAllowEdit] = useState(true);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
-    if (prompt?.prompt) {
+    if (doodle) {
+      // If a doodle exists, set its properties
+      if (doodle.dailyPromptId) {
+        setAddToTodaysDoodles(true);
+      } else {
+        setAddToTodaysDoodles(false);
+      }
+      setAllowEdit(doodle.editable);
+      // Only set the title from the prompt if the doodle doesn't already have one
+      if (!doodle.title && prompt?.prompt) {
+        setTitle(prompt.prompt);
+      }
+    } else if (prompt?.prompt) {
+      // If there's no doodle but there is a prompt, set the title from the prompt
       setTitle(prompt.prompt);
+      // Default values for a new doodle
+      setAddToTodaysDoodles(true);
+      setAllowEdit(true);
     }
-  }, [prompt]);
+  }, [doodle, prompt]);
 
   const colors = [
     "#000000",
@@ -456,7 +452,7 @@ const DoodleCanvas = ({ onSave, doodle, userId, prompt }) => {
     }
 
     if (shape) {
-      setActiveTool("select")
+      setActiveTool("select");
       fabricCanvas.isDrawingMode = false; // Disable drawing mode to interact with the shape
       fabricCanvas.add(shape);
       fabricCanvas.setActiveObject(shape);
@@ -482,12 +478,16 @@ const DoodleCanvas = ({ onSave, doodle, userId, prompt }) => {
     link.click();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!fabricCanvas) return;
+
+    setIsSaving(true);
+
     const imageUrl = fabricCanvas.toDataURL({ format: "png", quality: 1 });
     const json = JSON.stringify(fabricCanvas.toJSON());
-    onSave &&
-      onSave({
+
+    try {
+      await onSave({
         imageUrl,
         json,
         title,
@@ -496,6 +496,11 @@ const DoodleCanvas = ({ onSave, doodle, userId, prompt }) => {
         addToTodaysDoodles,
         editable: allowEdit,
       });
+    } catch (err) {
+      console.error("Failed to save doodle:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -544,8 +549,20 @@ const DoodleCanvas = ({ onSave, doodle, userId, prompt }) => {
           </label>
         </div>
         <div className="flex flex-col gap-3">
-          <Button onClick={handleSave} className="w-full rounded-full">
-            <Save className="mr-2 h-5 w-5" /> Save Doodle
+          <Button
+            onClick={handleSave}
+            className="w-full rounded-full"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-5 w-5" /> Save Doodle
+              </>
+            )}
           </Button>
           <Button
             variant="outline"
@@ -637,8 +654,20 @@ const DoodleCanvas = ({ onSave, doodle, userId, prompt }) => {
           </label>
         </div>
         <div className="flex flex-col gap-3">
-          <Button onClick={handleSave} className="w-full rounded-full">
-            <Save className="mr-2 h-5 w-5" /> Save Doodle
+          <Button
+            onClick={handleSave}
+            className="w-full rounded-full"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-5 w-5" /> Save Doodle
+              </>
+            )}
           </Button>
           <Button
             variant="outline"

@@ -1,3 +1,5 @@
+// components/DoodleEditor.jsx
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -15,6 +17,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import LoginModal from "@/components/LoginModal";
 import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+import quotes from "@/lib/quotes.json";
 
 const DoodleEditor = () => {
   const { data: session } = useSession();
@@ -23,17 +28,23 @@ const DoodleEditor = () => {
   const [doodle, setDoodle] = useState(null);
   const [doodleId, setDoodleId] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [quote, setQuote] = useState(null); // New state for the random quote
 
+  // Use a single useEffect for all data fetching and state initialization
   useEffect(() => {
+    // Select a random quote on component mount
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    setQuote(quotes[randomIndex]);
+
     const doodleIdParam = searchParams.get("id");
     if (doodleIdParam) {
       setDoodleId(doodleIdParam);
       const fetchDoodle = async () => {
         try {
-          const response = await fetch(`/api/doodle/${doodleIdParam}`);
+          const response = await fetch(`/api/doodles/${doodleIdParam}`);
           if (!response.ok) throw new Error("Failed to fetch doodle");
           const data = await response.json();
-          setDoodle(data.doodle);
+          setDoodle(data);
         } catch (err) {
           console.error(err);
         }
@@ -42,7 +53,7 @@ const DoodleEditor = () => {
     }
   }, [searchParams]);
 
-  const handleUpdateDoodle = async ({ title, json, imageUrl, zoomLevel, editable }) => {
+  const handleUpdateDoodle = async ({ title, json, imageUrl, zoomLevel, addToTodaysDoodles, editable }) => {
     if (!title) {
       toast({ title: "Missing title", description: "Please add a title." });
       return;
@@ -59,11 +70,12 @@ const DoodleEditor = () => {
     }
 
     try {
-      // Use the correct API endpoint and HTTP method (PUT)
-      const response = await fetch(`/api/doodle/${doodleId}`, {
+      const today = new Date();
+      const localDate = today.toISOString().split("T")[0];
+      const response = await fetch(`/api/updateDoodle/${doodleId}?date=${localDate}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, json, imageUrl, zoomLevel, editable }),
+        body: JSON.stringify({ title, json, imageUrl, zoomLevel, addToTodaysDoodles, editable }),
       });
 
       if (response.ok) {
@@ -78,7 +90,6 @@ const DoodleEditor = () => {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6 text-center">Edit Your Doodle</h1>
       {doodle ? (
         <DoodleCanvas
           onSave={handleUpdateDoodle}
@@ -86,7 +97,19 @@ const DoodleEditor = () => {
           userId={session?.user?.id ?? ""}
         />
       ) : (
-        <p className="text-center text-muted-foreground">Loading doodle...</p>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] text-muted-foreground">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 text-center max-w-sm px-4">
+            {quote ? (
+              <>
+                <span className="font-semibold italic">"{quote.quote}"</span>
+                <span className="block mt-2 text-sm font-medium"> - {quote.author}</span>
+              </>
+            ) : (
+              "Loading doodle..."
+            )}
+          </p>
+        </div>
       )}
 
       <LoginModal
@@ -104,7 +127,6 @@ const EditDoodle = () => {
   return (
     <Layout user={session?.user ?? null}>
       <div className="container py-8">
-        {/* Wrap the client component in a Suspense boundary */}
         <Suspense fallback={<div>Loading...</div>}>
           <DoodleEditor />
         </Suspense>
