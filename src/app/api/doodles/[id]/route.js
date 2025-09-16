@@ -21,7 +21,7 @@ export async function GET({ request }, { params }) {
         id: doodleId,
       },
       include: {
-        profile: true, // Include related profile if necessary
+        profile: true,
       },
     });
 

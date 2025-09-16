@@ -54,7 +54,7 @@ const CreateDoodle = () => {
     showNewBadgeModal,
     setShowNewBadgeModal,
     earnedBadges,
-  } = useBadges(session?.user?.id ?? "");
+  } = useBadges();
 
   useEffect(() => {
     const fetchPrompt = async () => {
@@ -153,7 +153,7 @@ const CreateDoodle = () => {
           title: "Doodle submitted",
           description: "Your daily doodle has been submitted!",
         });
-        router.push(`/edit?id=${data.doodle.id}`);
+        // router.push(`/edit?id=${data.doodle.id}`);
       } else {
         toast({
           title: "Error",

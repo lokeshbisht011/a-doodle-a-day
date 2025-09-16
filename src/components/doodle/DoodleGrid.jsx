@@ -12,7 +12,7 @@ const formatDate = (daysAgo = 0) => {
   return d.toISOString().split("T")[0];
 };
 
-const DoodleGrid = () => {
+const DoodleGrid = ({currentUserProfile}) => {
   const { data: session } = useSession();
   const [todayDoodles, setTodayDoodles] = useState([]);
   const [yesterdayDoodles, setYesterdayDoodles] = useState([]);
@@ -84,7 +84,7 @@ const DoodleGrid = () => {
           date="Today"
           prompt={todayDoodles[0].dailyPrompt}
           doodles={todayDoodles}
-          currentUserProfile={session?.user || null}
+          currentUserProfile={currentUserProfile}
           onDoodleDeleted={handleDoodleDeleted}
         />
       ) : (
@@ -99,7 +99,7 @@ const DoodleGrid = () => {
           date="Yesterday"
           prompt={yesterdayDoodles[0].dailyPrompt}
           doodles={yesterdayDoodles}
-          currentUserProfile={session?.user || null}
+          currentUserProfile={currentUserProfile}
           onDoodleDeleted={handleDoodleDeleted}
         />
       ) : (

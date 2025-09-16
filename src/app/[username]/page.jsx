@@ -33,7 +33,7 @@ export default function ProfilePage() {
   const [followingCount, setFollowingCount] = useState(0);
   const [currentUserProfile, setCurrentUserProfile] = useState(null);
 
-  const { badges, loading } = useBadges(profile?.userId);
+  const { badges, loading } = useBadges();
 
   useEffect(() => {
     const fetchProfile = async () => {

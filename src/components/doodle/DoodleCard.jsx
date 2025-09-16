@@ -13,10 +13,11 @@ import { Heart, MessageCircle, Share2, Edit, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import BoringAvatar from "boring-avatars";
-import DoodleModal from "./DoodleModal";
 import Image from "next/image";
 import { useToast } from "../ui/use-toast";
+import DoodleModal from "./DoodleModal";
 import DeleteDoodleDialog from "./DeleteDoodleDialog";
+import ShareModal from "../ShareModal";
 
 const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
   const { toast } = useToast();
@@ -25,6 +26,7 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false); // New state for share modal
 
   useEffect(() => {
     if (currentUserProfile) {
@@ -74,6 +76,19 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
 
   const handleDeleteDoodle = () => {
     setIsDeleteDialogOpen(true);
+  };
+  
+  // New handler for opening the share modal
+  const handleShareClick = (e) => {
+    e.stopPropagation(); // Prevents the card's onClick from firing
+    setIsShareModalOpen(true);
+  };
+
+  // Define the data to be shared
+  const shareData = {
+    title: `Check out this doodle by ${doodle.profile.username}!`,
+    text: `"${doodle.title || 'Untitled doodle'}" - a doodle by ${doodle.profile.username} on A-Doodle-A-Day.`,
+    url: `${process.env.NEXT_PUBLIC_BASE_URL}/doodle?id=${doodle.id}`,
   };
 
   return (
@@ -132,7 +147,6 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
         />
       </div>
 
-      {/* Footer actions */}
       <CardFooter className="p-4 flex items-center justify-between">
         <div className="flex gap-4">
           <Button
@@ -157,7 +171,8 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          {/* Update the Share button */}
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShareClick}>
             <Share2 className="h-4 w-4" />
           </Button>
 
@@ -181,6 +196,7 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
         </div>
       </CardFooter>
 
+      {/* Doodle Modal */}
       <DoodleModal
         doodle={doodle}
         isOpen={isModalOpen}
@@ -188,11 +204,19 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
         currentUserProfile={currentUserProfile}
       />
 
+      {/* Delete Dialog */}
       <DeleteDoodleDialog
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         doodleId={doodle.id}
         onDoodleDeleted={onDoodleDeleted}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        shareData={shareData}
       />
     </Card>
   );

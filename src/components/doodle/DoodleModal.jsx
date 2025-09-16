@@ -22,7 +22,7 @@ const DoodleModal = ({ doodle, isOpen, onClose, currentUserProfile }) => {
   const [comments, setComments] = useState(doodle.comments || []);
   const [commentText, setCommentText] = useState("");
 
-  const { handleUserAction } = useBadges(currentUserProfile?.userId ?? "");
+  const { handleUserAction } = useBadges();
 
   useEffect(() => {
     if (currentUserProfile) {

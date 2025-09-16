@@ -38,6 +38,7 @@ model Profile {
   likes       Like[]
 
   likesReceivedCount Int @default(0)
+  doodlesLikedCount  Int      @default(0)
   maxStreakCount    Int @default(0)
 
   followers   Follow[] @relation("Followers")
@@ -186,10 +187,12 @@ model Streak {
 }
 
 model Badge {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @map("_id")
   name        String
   description String
-  iconUrl     String?
+  icon        String
+  requirement Int      @default(1)
+  type        String
 
   profiles    BadgeOnProfile[]
 
@@ -200,7 +203,7 @@ model Badge {
 model BadgeOnProfile {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   profileId  String   @db.ObjectId
-  badgeId    String   @db.ObjectId
+  badgeId    String
 
   profile    Profile  @relation(fields: [profileId], references: [id])
   badge      Badge    @relation(fields: [badgeId], references: [id])

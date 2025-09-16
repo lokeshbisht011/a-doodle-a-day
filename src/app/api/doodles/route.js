@@ -35,6 +35,7 @@ export async function GET(request) {
         likes: true,
         profile: {
           select: {
+            id: true,
             username: true,
             avatarConfig: true,
           },

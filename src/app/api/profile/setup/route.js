@@ -50,6 +50,7 @@ export async function POST(req) {
         commentCount: 0,
         currentStreak: 0,
         likesReceivedCount: 0,
+        doodlesLikedCount: 0,
         maxStreakCount: 0,
         lastActivity: null,
 
