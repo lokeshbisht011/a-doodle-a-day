@@ -111,7 +111,6 @@ export default function ProfilePage() {
     );
   }
 
-  // 🔹 Sort badges to show earned first, then render a single list
   const sortedBadges = badges
     ? [...badges].sort((a, b) => (b.isEarned - a.isEarned))
     : [];

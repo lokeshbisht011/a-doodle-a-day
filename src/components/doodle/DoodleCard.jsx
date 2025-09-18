@@ -26,14 +26,14 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false); // New state for share modal
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentUserProfile) {
       setLiked(
         doodle.likes.some((like) => like.profileId === currentUserProfile.id)
       );
-      setIsCurrentUser(currentUserProfile?.id === doodle.profile.id);
+      setIsCurrentUser(currentUserProfile?.id === doodle.profileId);
     }
   }, [currentUserProfile, doodle]);
 
@@ -77,7 +77,7 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
   const handleDeleteDoodle = () => {
     setIsDeleteDialogOpen(true);
   };
-  
+
   // New handler for opening the share modal
   const handleShareClick = (e) => {
     e.stopPropagation(); // Prevents the card's onClick from firing
@@ -87,47 +87,47 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
   // Define the data to be shared
   const shareData = {
     title: `Check out this doodle by ${doodle.profile.username}!`,
-    text: `"${doodle.title || 'Untitled doodle'}" - a doodle by ${doodle.profile.username} on A-Doodle-A-Day.`,
+    text: `"${doodle.title || "Untitled doodle"}" - a doodle by ${
+      doodle.profile.username
+    } on A-Doodle-A-Day.`,
     url: `${process.env.NEXT_PUBLIC_BASE_URL}/doodle?id=${doodle.id}`,
   };
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg animate-fade-in">
-      {!isCurrentUser && (
-        <CardHeader className="p-4 flex flex-row items-center gap-3">
-          <Link href={`/${doodle.profile.username}`}>
-            {doodle.profile?.avatarConfig ? (
-              <BoringAvatar
-                size={36}
-                name={doodle.profile.avatarConfig.seed}
-                variant={doodle.profile.avatarConfig.variant}
-                colors={doodle.profile.avatarConfig.colors}
-              />
-            ) : (
-              <Avatar className="h-9 w-9">
-                <AvatarImage alt={doodle.profile.username || "User"} />
-                <AvatarFallback>
-                  {doodle.profile.username?.charAt(0) || "U"}
-                </AvatarFallback>
-              </Avatar>
-            )}
-          </Link>
+      <CardHeader className="p-4 flex flex-row items-center gap-3">
+        <Link href={`/${doodle.profile.username}`}>
+          {doodle.profile?.avatarConfig ? (
+            <BoringAvatar
+              size={36}
+              name={doodle.profile.avatarConfig.seed}
+              variant={doodle.profile.avatarConfig.variant}
+              colors={doodle.profile.avatarConfig.colors}
+            />
+          ) : (
+            <Avatar className="h-9 w-9">
+              <AvatarImage alt={doodle.profile.username || "User"} />
+              <AvatarFallback>
+                {doodle.profile.username?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
+          )}
+        </Link>
 
-          <div className="flex flex-col">
-            <Link
-              href={`/${doodle.profile.username}`}
-              className="font-medium text-sm hover:underline"
-            >
-              {doodle.profile.username}
-            </Link>
-            <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(doodle.createdAt), {
-                addSuffix: true,
-              })}
-            </span>
-          </div>
-        </CardHeader>
-      )}
+        <div className="flex flex-col">
+          <Link
+            href={`/${doodle.profile.username}`}
+            className="font-medium text-sm hover:underline"
+          >
+            {doodle.profile.username}
+          </Link>
+          <span className="text-xs text-muted-foreground">
+            {formatDistanceToNow(new Date(doodle.createdAt), {
+              addSuffix: true,
+            })}
+          </span>
+        </div>
+      </CardHeader>
 
       {doodle.title && (
         <h3 className="text-lg font-semibold px-4 pb-2 text-center line-clamp-1">
@@ -172,7 +172,12 @@ const DoodleCard = ({ doodle, currentUserProfile, onDoodleDeleted }) => {
 
         <div className="flex gap-2">
           {/* Update the Share button */}
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShareClick}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleShareClick}
+          >
             <Share2 className="h-4 w-4" />
           </Button>
 

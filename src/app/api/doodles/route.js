@@ -51,6 +51,12 @@ export async function GET(request) {
             },
           },
         },
+        dailyPrompt: {
+          select: {
+            prompt: true,
+            promptDescription: true
+          }
+        }
       },
       take: limit,
     });

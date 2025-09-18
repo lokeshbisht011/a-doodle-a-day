@@ -30,9 +30,9 @@ const NewBadgeModal = ({ isOpen, onClose, badges }) => {
   const badgeShareData = {
     title: `Badge Unlocked!`,
     text: `I just earned the "${badges[0]?.name}" badge on A-Doodle-A-Day! Check it out!`,
-    url: typeof window !== 'undefined' ? window.location.href : '',
+    url: typeof window !== "undefined" ? window.location.href : "",
   };
-  
+
   // UX consideration: if the user earned multiple badges, we can update the share text
   if (badges.length > 1) {
     badgeShareData.title = `Multiple Badges Unlocked!`;
@@ -60,16 +60,6 @@ const NewBadgeModal = ({ isOpen, onClose, badges }) => {
                 exit="exit"
               >
                 <Confetti active={isOpen} />
-
-                {/* Close Button */}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute top-2 right-2 rounded-full text-muted-foreground hover:bg-muted"
-                  onClick={onClose}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
 
                 <motion.div
                   initial={{ scale: 0 }}
@@ -115,7 +105,9 @@ const NewBadgeModal = ({ isOpen, onClose, badges }) => {
                   transition={{ delay: 0.8, duration: 0.5 }}
                   className="mt-5 flex justify-center gap-3"
                 >
-                  <Button onClick={onClose} variant="outline">Close</Button>
+                  <Button onClick={onClose} variant="outline">
+                    Close
+                  </Button>
                   <Button onClick={handleShareClick}>
                     <Share2 className="mr-2 h-4 w-4" />
                     Share

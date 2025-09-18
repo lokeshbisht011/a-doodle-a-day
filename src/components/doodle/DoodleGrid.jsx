@@ -12,7 +12,7 @@ const formatDate = (daysAgo = 0) => {
   return d.toISOString().split("T")[0];
 };
 
-const DoodleGrid = ({currentUserProfile}) => {
+const DoodleGrid = ({ currentUserProfile }) => {
   const { data: session } = useSession();
   const [todayDoodles, setTodayDoodles] = useState([]);
   const [yesterdayDoodles, setYesterdayDoodles] = useState([]);
@@ -30,7 +30,6 @@ const DoodleGrid = ({currentUserProfile}) => {
     </div>
   );
 
-  // Fetch today's doodles
   useEffect(() => {
     const fetchTodayDoodles = async () => {
       setLoadingToday(true);
@@ -48,7 +47,6 @@ const DoodleGrid = ({currentUserProfile}) => {
     fetchTodayDoodles();
   }, []);
 
-  // Fetch yesterday's doodles
   useEffect(() => {
     const fetchYesterdayDoodles = async () => {
       setLoadingYesterday(true);
@@ -76,49 +74,62 @@ const DoodleGrid = ({currentUserProfile}) => {
   };
 
   return (
-    <div>
-      {loadingToday ? (
-        <DoodlesLoader />
-      ) : todayDoodles.length > 0 ? (
-        <DoodlesSection
-          date="Today"
-          prompt={todayDoodles[0].dailyPrompt}
-          doodles={todayDoodles}
-          currentUserProfile={currentUserProfile}
-          onDoodleDeleted={handleDoodleDeleted}
-        />
-      ) : (
-        <p className="text-muted-foreground">No doodles today.</p>
-      )}
+    <section className="py-20 gradient-soft">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            Latest Doodles
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            A gallery of the most recent and popular doodles from our community.
+          </p>
+        </div>
 
-      {/* Yesterday's Section */}
-      {loadingYesterday ? (
-        <DoodlesLoader />
-      ) : yesterdayDoodles.length > 0 ? (
-        <DoodlesSection
-          date="Yesterday"
-          prompt={yesterdayDoodles[0].dailyPrompt}
-          doodles={yesterdayDoodles}
-          currentUserProfile={currentUserProfile}
-          onDoodleDeleted={handleDoodleDeleted}
-        />
-      ) : (
-        <p className="text-muted-foreground">No doodles yesterday.</p>
-      )}
+        <div>
+          {loadingToday ? (
+            <DoodlesLoader />
+          ) : (
+            todayDoodles.length > 0 && (
+              <DoodlesSection
+                date="Today's Doodles"
+                prompt={todayDoodles[0].dailyPrompt}
+                doodles={todayDoodles}
+                currentUserProfile={currentUserProfile}
+                onDoodleDeleted={handleDoodleDeleted}
+              />
+            )
+          )}
+          {loadingYesterday ? (
+            <DoodlesLoader />
+          ) : (
+            yesterdayDoodles.length > 0 && (
+              <DoodlesSection
+                date="Yesterday's Doodles"
+                prompt={yesterdayDoodles[0].dailyPrompt}
+                doodles={yesterdayDoodles}
+                currentUserProfile={currentUserProfile}
+                onDoodleDeleted={handleDoodleDeleted}
+              />
+            )
+          )}
 
-      {todayDoodles.length === 0 &&
-        yesterdayDoodles.length === 0 &&
-        !loadingToday &&
-        !loadingYesterday && (
-          <p className="text-muted-foreground">No recent doodles to display.</p>
-        )}
+          {todayDoodles.length === 0 &&
+            yesterdayDoodles.length === 0 &&
+            !loadingToday &&
+            !loadingYesterday && (
+              <p className="text-muted-foreground">
+                No recent doodles to display.
+              </p>
+            )}
+        </div>
 
-      <div className="text-center mt-6">
-        <Link href="/gallery">
-          <Button variant="outline">View More</Button>
-        </Link>
+        <div className="mt-10 text-center">
+          <Link href="/gallery">
+            <Button variant="outline">View More</Button>
+          </Link>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

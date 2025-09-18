@@ -1,5 +1,3 @@
-// components/DoodleEditor.jsx
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -122,10 +120,8 @@ const DoodleEditor = () => {
 };
 
 const EditDoodle = () => {
-  const { data: session } = useSession();
-
   return (
-    <Layout user={session?.user ?? null}>
+    <Layout>
       <div className="container py-8">
         <Suspense fallback={<div>Loading...</div>}>
           <DoodleEditor />
